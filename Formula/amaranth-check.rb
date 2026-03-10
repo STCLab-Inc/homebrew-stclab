@@ -72,10 +72,10 @@ end
 class AmaranthCheck < Formula
   desc "macOS menu bar app for Amaranth attendance tracking"
   homepage "https://github.com/STCLab-Inc/amaranth-check"
-  url "https://github.com/STCLab-Inc/amaranth-check/releases/download/v0.3.2/amaranth-check-0.3.2-arm64.tar.gz",
+  url "https://github.com/STCLab-Inc/amaranth-check/releases/download/v0.3.3/amaranth-check-0.3.3-arm64.tar.gz",
       using: GitHubPrivateReleaseDownloadStrategy
-  sha256 "10ceab65df5f186f2addb749e7935e7b54316a24beaa73c80d32b2746fae65bc"
-  version "0.3.2"
+  sha256 "c10dc9f94065b07a0939284d0ca3ec30d98822d5c07c5592cbce20008ea09ca7"
+  version "0.3.3"
   license "Proprietary"
 
   depends_on "node"
@@ -84,6 +84,12 @@ class AmaranthCheck < Formula
 
   def install
     bin.install "amaranth-check"
+  end
+
+  def post_install
+    # 기존 프로세스 종료 후 새 버전으로 재시작
+    system "pkill", "-f", "amaranth-check --foreground"
+    system bin/"amaranth-check"
   end
 
   def caveats
