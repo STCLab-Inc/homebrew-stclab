@@ -15,20 +15,6 @@ class AmaranthCheck < Formula
     bin.install ".build/release/amaranth-check"
   end
 
-  def post_install
-    # Playwright 설치 (사용자 홈 디렉토리에)
-    home = ENV["HOME"] || Dir.home
-    check_dir = "#{home}/.amaranth-check"
-    mkdir_p check_dir
-
-    pkg_json = "#{check_dir}/package.json"
-    unless File.exist?(pkg_json)
-      File.write(pkg_json, '{"name":"amaranth-check","version":"1.0.0","type":"module","private":true}')
-    end
-
-    system "bash", "-c", "cd #{check_dir} && npm install playwright 2>/dev/null && npx playwright install chromium 2>/dev/null"
-  end
-
   def caveats
     <<~EOS
       Setup:
