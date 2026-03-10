@@ -14,6 +14,7 @@ cask "amaranth-check" do
 
   postflight do
     set_permissions "#{staged_path}/amaranth-check", "+x"
+    system_command "/usr/bin/xattr", args: ["-d", "com.apple.quarantine", "#{staged_path}/amaranth-check"]
   end
 
   caveats <<~EOS
