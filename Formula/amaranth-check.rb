@@ -1,54 +1,71 @@
 require "download_strategy"
 
-class GitHubCliDownloadStrategy < CurlDownloadStrategy
+class GitHubPrivateReleaseDownloadStrategy < CurlDownloadStrategy
   def initialize(url, name, version, **meta)
     super
-    match_data = %r{^https?://github\.com/(?<owner>[^/]+)/(?<repo>[^/]+)/releases/download/(?<tag>[^/]+)}.match(@url)
+    match_data = %r{^https?://github\.com/(?<owner>[^/]+)/(?<repo>[^/]+)/releases/download/(?<tag>[^/]+)/(?<file>.+)$}.match(@url)
     return unless match_data
 
     @owner = match_data[:owner]
     @repo = match_data[:repo]
     @tag = match_data[:tag]
-    @filename = File.basename(@url)
-  end
-
-  def find_gh
-    paths = [
-      "/opt/homebrew/bin/gh",
-      "/usr/local/bin/gh",
-      "#{ENV["HOME"]}/.local/bin/gh",
-    ]
-    # Also search PATH from user's shell
-    user_gh = `bash -lc 'which gh' 2>/dev/null`.chomp
-    paths.unshift(user_gh) unless user_gh.empty?
-    found = paths.find { |p| File.executable?(p) }
-    raise CurlDownloadStrategyError, "gh CLI not found. Install with: brew install gh" unless found
-
-    found
+    @release_file = match_data[:file]
   end
 
   def fetch(timeout: nil)
-    ohai "Downloading #{url} using GitHub CLI"
+    ohai "Downloading #{@release_file} from private release"
     if cached_location.exist?
       puts "Already downloaded: #{cached_location}"
     else
-      gh = find_gh
-      temporary_path.dirname.mkpath
-      system_command!(gh, args: [
-        "release", "download", @tag,
-        "-R", "#{@owner}/#{@repo}",
-        "--pattern", @filename,
-        "-D", temporary_path.to_s,
-      ], print_stderr: true)
+      token = github_token
+      raise CurlDownloadStrategyError, <<~EOS unless token
+        GitHub API token not found. Set one of:
+          export HOMEBREW_GITHUB_API_TOKEN=your_token
+        or install and authenticate gh:
+          brew install gh && gh auth login
+      EOS
 
-      downloaded_file = Dir["#{temporary_path}/*"].first
-      raise CurlDownloadStrategyError, "Downloaded file not found" unless downloaded_file
+      # Get asset download URL from GitHub API
+      release_url = "https://api.github.com/repos/#{@owner}/#{@repo}/releases/tags/#{@tag}"
+      release_json = `curl -sH "Authorization: token #{token}" "#{release_url}" 2>/dev/null`
+      release = JSON.parse(release_json)
 
+      asset = release.fetch("assets", []).find { |a| a["name"] == @release_file }
+      raise CurlDownloadStrategyError, "Asset #{@release_file} not found in release #{@tag}" unless asset
+
+      asset_api_url = asset["url"]
+
+      # Download the actual binary
       cached_location.dirname.mkpath
-      FileUtils.mv(downloaded_file, cached_location)
+      system "curl", "-L", "-o", cached_location.to_s,
+             "-H", "Authorization: token #{token}",
+             "-H", "Accept: application/octet-stream",
+             asset_api_url
+      raise CurlDownloadStrategyError, "Download failed" unless cached_location.exist?
     end
     symlink_location.dirname.mkpath
     FileUtils.ln_s cached_location.relative_path_from(symlink_location.dirname), symlink_location, force: true
+  end
+
+  private
+
+  def github_token
+    # 1. HOMEBREW_GITHUB_API_TOKEN env var
+    token = ENV["HOMEBREW_GITHUB_API_TOKEN"]
+    return token if token && !token.empty?
+
+    # 2. gh auth token (try user's login shell)
+    token = `bash -lc 'gh auth token' 2>/dev/null`.chomp
+    return token if $?.success? && !token.empty?
+
+    # 3. Homebrew's built-in GitHub credentials
+    begin
+      return GitHub::API.credentials if defined?(GitHub::API)
+    rescue
+      nil
+    end
+
+    nil
   end
 end
 
@@ -56,7 +73,7 @@ class AmaranthCheck < Formula
   desc "macOS menu bar app for Amaranth attendance tracking"
   homepage "https://github.com/STCLab-Inc/amaranth-check"
   url "https://github.com/STCLab-Inc/amaranth-check/releases/download/v0.3.0/amaranth-check-0.3.0-arm64.tar.gz",
-      using: GitHubCliDownloadStrategy
+      using: GitHubPrivateReleaseDownloadStrategy
   sha256 "eb473e6bb2db4a4523b8d374183736223e67eb678b323399f7165f223523aed2"
   version "0.3.0"
   license "Proprietary"
