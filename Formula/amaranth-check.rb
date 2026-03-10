@@ -2,7 +2,7 @@ class AmaranthCheck < Formula
   desc "macOS menu bar app for Amaranth attendance tracking"
   homepage "https://github.com/STCLab-Inc/amaranth-check"
   url "https://github.com/STCLab-Inc/amaranth-check.git", branch: "main"
-  version "0.1.0"
+  version "0.2.0"
   license "Proprietary"
 
   depends_on "node"
