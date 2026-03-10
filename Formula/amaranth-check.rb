@@ -72,10 +72,10 @@ end
 class AmaranthCheck < Formula
   desc "macOS menu bar app for Amaranth attendance tracking"
   homepage "https://github.com/STCLab-Inc/amaranth-check"
-  url "https://github.com/STCLab-Inc/amaranth-check/releases/download/v0.3.0/amaranth-check-0.3.0-arm64.tar.gz",
+  url "https://github.com/STCLab-Inc/amaranth-check/releases/download/v0.3.1/amaranth-check-0.3.1-arm64.tar.gz",
       using: GitHubPrivateReleaseDownloadStrategy
-  sha256 "eb473e6bb2db4a4523b8d374183736223e67eb678b323399f7165f223523aed2"
-  version "0.3.0"
+  sha256 "ad62b93d79592d7c3763e94b1d4d1c11f1aaddb061996d6cfb7af0206ee65318"
+  version "0.3.1"
   license "Proprietary"
 
   depends_on "node"
@@ -94,7 +94,8 @@ class AmaranthCheck < Formula
       Start:
         amaranth-check
 
-      To start at login, enable "Launch at Login" in Settings.
+      Launch at Login is enabled by default.
+      Change in menu bar → Settings → General.
     EOS
   end
 
