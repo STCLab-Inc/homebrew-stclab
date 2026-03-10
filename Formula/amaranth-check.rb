@@ -12,13 +12,29 @@ class GitHubCliDownloadStrategy < CurlDownloadStrategy
     @filename = File.basename(@url)
   end
 
+  def find_gh
+    paths = [
+      "/opt/homebrew/bin/gh",
+      "/usr/local/bin/gh",
+      "#{ENV["HOME"]}/.local/bin/gh",
+    ]
+    # Also search PATH from user's shell
+    user_gh = `bash -lc 'which gh' 2>/dev/null`.chomp
+    paths.unshift(user_gh) unless user_gh.empty?
+    found = paths.find { |p| File.executable?(p) }
+    raise CurlDownloadStrategyError, "gh CLI not found. Install with: brew install gh" unless found
+
+    found
+  end
+
   def fetch(timeout: nil)
     ohai "Downloading #{url} using GitHub CLI"
     if cached_location.exist?
       puts "Already downloaded: #{cached_location}"
     else
+      gh = find_gh
       temporary_path.dirname.mkpath
-      system_command!("gh", args: [
+      system_command!(gh, args: [
         "release", "download", @tag,
         "-R", "#{@owner}/#{@repo}",
         "--pattern", @filename,
