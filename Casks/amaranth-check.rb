@@ -13,8 +13,7 @@ cask "amaranth-check" do
   binary "amaranth-check"
 
   postflight do
-    system_command "pkill", args: ["-f", "amaranth-check --foreground"], print_stderr: false
-    system_command "#{staged_path}/amaranth-check", print_stderr: false
+    set_permissions "#{staged_path}/amaranth-check", "+x"
   end
 
   caveats <<~EOS
