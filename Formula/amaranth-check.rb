@@ -88,7 +88,7 @@ class AmaranthCheck < Formula
 
   def post_install
     # 기존 프로세스 종료 후 새 버전으로 재시작
-    system "pkill", "-f", "amaranth-check --foreground"
+    quiet_system "pkill", "-f", "amaranth-check --foreground"
     system bin/"amaranth-check"
   end
 
