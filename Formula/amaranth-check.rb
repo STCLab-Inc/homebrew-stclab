@@ -72,10 +72,10 @@ end
 class AmaranthCheck < Formula
   desc "macOS menu bar app for Amaranth attendance tracking"
   homepage "https://github.com/STCLab-Inc/amaranth-check"
-  url "https://github.com/STCLab-Inc/amaranth-check/releases/download/v0.3.3/amaranth-check-0.3.3-arm64.tar.gz",
+  url "https://github.com/STCLab-Inc/amaranth-check/releases/download/v0.3.4/amaranth-check-0.3.4-arm64.tar.gz",
       using: GitHubPrivateReleaseDownloadStrategy
-  sha256 "c10dc9f94065b07a0939284d0ca3ec30d98822d5c07c5592cbce20008ea09ca7"
-  version "0.3.3"
+  sha256 "3e37005151456601c1cb46bdc827f2802595ecb3584f0a3d9e0d75352137d3a4"
+  version "0.3.4"
   license "Proprietary"
 
   depends_on "node"
