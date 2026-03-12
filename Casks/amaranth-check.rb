@@ -15,6 +15,9 @@ cask "amaranth-check" do
   postflight do
     set_permissions "#{staged_path}/amaranth-check", "+x"
     system_command "/usr/bin/xattr", args: ["-d", "com.apple.quarantine", "#{staged_path}/amaranth-check"]
+    # 업그레이드 후 자동 재실행
+    system_command "/usr/bin/pkill", args: ["-f", "amaranth-check --foreground"], must_succeed: false
+    system_command "#{HOMEBREW_PREFIX}/bin/amaranth-check", must_succeed: false
   end
 
   caveats <<~EOS
