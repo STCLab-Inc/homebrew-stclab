@@ -1,6 +1,6 @@
 cask "amaranth-check" do
-  version "0.6.2"
-  sha256 "88e30c273a20f94008523c7bc84640bce3a774accb3bbcece59591eb1489e8fa"
+  version "0.6.3"
+  sha256 "57cf638c3ce9b45a4285f02cd6f1bcf35666262254c829ac490890b6ca33bb62"
 
   url "https://github.com/STCLab-Inc/amaranth-check/releases/download/v#{version}/amaranth-check-#{version}-arm64.tar.gz"
   name "Amaranth Check"
